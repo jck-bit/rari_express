@@ -18,6 +18,10 @@ const pool = new Pool({
     },
 })
 
+app.get('/', async(req, res) =>{
+  res.send("Hello from Express")
+})
+
 app.get('/images', async (req, res) => {
     try {
       const result = await pool.query('SELECT * FROM image');
