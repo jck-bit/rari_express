@@ -47,7 +47,6 @@ out/
 .nuxt/
 
 # Build output
-build/
 dist/
 
 # Serverless
