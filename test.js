@@ -10,4 +10,16 @@ const testEndpoint =  async() =>{
     }
 }
 
-testEndpoint()
+//testEndpoint()
+
+
+const testSingleImage = async()=>{
+    try {
+        const response = await axios.get(`http://localhost:3000/images/${67}`)
+        console.log(response.data)
+    } catch (error) {
+        console.error('Error fetching image:', error);
+    }
+}
+
+testSingleImage()
