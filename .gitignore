@@ -1,0 +1,60 @@
+# Dependency directories
+node_modules/
+
+# Environment variables file
+.env
+
+# Optional npm debug log
+npm-debug.log
+
+# macOS hidden files
+.DS_Store
+
+# JetBrains IDEs
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Editor configuration
+*.editorconfig
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Node.js generated files
+npm-debug.log
+yarn-error.log
+
+# Dependency directories
+node_modules/
+
+# Optional eslint cache
+.eslintcache
+
+# Docker
+.dockerignore
+
+# Next.js build output
+.next/
+out/
+
+# Nuxt.js build output
+.nuxt/
+
+# Build output
+build/
+dist/
+
+# Serverless
+.serverless/
+
+# TypeScript build output
+*.tsbuildinfo
+
+# Local files
+local.env
