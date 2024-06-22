@@ -8,13 +8,13 @@ app.use(cors());
 const port = 3000;
 
 const pool = new Pool({
-    user: process.env.user,
-    host: process.env.host,
-    database: process.env.database,
-    password: process.env.password,
+    user: process.env.USER,
+    host: process.env.HOST,
+    database: process.env.DATABASE,
+    password: process.env.PASSWORD,
     port: 5432,
     ssl: {
-      rejectUnauthorized: false, // for self-signed certificates
+      rejectUnauthorized: false,
     },
 })
 
@@ -25,11 +25,11 @@ app.get('/', async(req, res) =>{
 app.get('/images', async (req, res) => {
     try {
       const result = await pool.query('SELECT * FROM image');
-      res.json(result);
-      console.log(result)
+      res.json(result.rows);
+      console.log(result.rows)
     } catch (err) {
       console.error('Error querying the database:', err);
-      res.status(500).send('Server error');
+      res.status(500).json({ Error:"Server Error",details:err.message })
     }
   });
 
