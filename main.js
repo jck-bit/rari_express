@@ -52,7 +52,23 @@ app.get('/images', async (req, res) => {
       res.status(500).json({ error: 'Server error' });
     }
   });
-  
+
+  app.delete('/images/:id', async (req, res) => {
+    const imageId = req.params.id;
+
+    try {
+        const result = await pool.query('DELETE FROM image WHERE id = $1 RETURNING *', [imageId]);
+
+        if (result.rows.length > 0) {
+            res.json({ message: 'Image deleted successfully', image: result.rows[0] });
+        } else {
+            res.status(404).json({ message: 'Image not found' });
+        }
+    } catch (err) {
+        console.error('Error deleting the image:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
