@@ -1,6 +1,5 @@
 const axios = require('axios')
 
-
 const testEndpoint =  async() =>{
     try{
         const response = await axios.get('http://localhost:3000/images');
@@ -10,9 +9,7 @@ const testEndpoint =  async() =>{
     }
 }
 
-//testEndpoint()
-
-
+testEndpoint()
 const testSingleImage = async()=>{
     try {
         const response = await axios.get(`http://localhost:3000/images/${6}`)
@@ -22,4 +19,4 @@ const testSingleImage = async()=>{
     }
 }
 
-testSingleImage()
+//testSingleImage()
