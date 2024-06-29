@@ -1,9 +1,8 @@
 require('dotenv').config();
+import { createClient } from 'redis';
 
-const redis = require('redis');
 
-
-const redisClient = redis.createClient({
+const redisClient = createClient({
   password: process.env.REDDIS_PASSWORD,
   socket: {
       host: process.env.REDDIS_HOST,
@@ -23,4 +22,4 @@ const connectRedis = async () => {
 
 connectRedis();
 
-module.exports = redisClient;
+export default redisClient;
