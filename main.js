@@ -35,7 +35,7 @@ app.get('/images', authMiddleware, async (req, res) => {
       return res.json(JSON.parse(cachedImages));
     }
 
-    const result = await pool.query('SELECT id, name, image_url, date_created FROM image ORDER BY date_created DESC LIMIT 100');
+    const result = await pool.query('SELECT id, name, image_url, date_created FROM image ORDER BY date_created DESC');
     await redisClient.set('images', JSON.stringify(result.rows), {
       EX: 60 * 60, 
     });
