@@ -1,16 +1,15 @@
 require('dotenv').config();
-const express = require('express');
-const { Pool } = require('pg');
-require('dotenv').config();
-const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const authMiddleware = require('./middleware/authMiddlware')
-const redisClient = require('./redis/redisClient');
+import express, { json } from 'express';
+import { Pool } from 'pg';
+import cors from 'cors';
+import { sign } from 'jsonwebtoken';
+import { compare } from 'bcryptjs';
+import authMiddleware from './authMiddlware';
+import { get, set, del } from './redisClient';
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(json());
 
 
 const pool = new Pool({
@@ -41,11 +40,11 @@ app.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    const validPassword = await compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.json({ token });
   } catch (err) {
@@ -56,13 +55,13 @@ app.post('/login', async (req, res) => {
 
 app.get('/images', authMiddleware, async (req, res) => {
   try {
-    const cachedImages = await redisClient.get('images');
+    const cachedImages = await get('images');
     if (cachedImages) {
       return res.json(JSON.parse(cachedImages));
     }
 
     const result = await pool.query('SELECT id, name, image_url, date_created FROM image ORDER BY date_created DESC');
-    await redisClient.set('images', JSON.stringify(result.rows), {
+    await set('images', JSON.stringify(result.rows), {
       EX: 60 * 60, 
     });
 
@@ -125,7 +124,7 @@ app.post('/saved-images', authMiddleware, async (req, res) => {
     }
 
     // Invalidate the cache
-    await redisClient.del('images');
+    await del('images');
 
     res.status(201).json({ message: 'Image saved successfully' });
   } catch (err) {
@@ -141,7 +140,7 @@ app.delete('/images/:id', authMiddleware, async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM image WHERE id = $1 RETURNING *', [imageId]);
     if (result.rows.length > 0) {
-      await redisClient.del('images')
+      await del('images')
       res.json({ message: 'Image deleted successfully', image: result.rows[0] });
     } else {
       res.status(404).json({ message: 'Image not found' });
