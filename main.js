@@ -4,8 +4,8 @@ require('dotenv').config();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const authMiddleware = require('./middleware/authMiddlware')
-const redisClient = require('./redis/redisClient');
+const authMiddleware = require('./authMiddlware')
+const redisClient = require('./redisClient');
 
 
 const app = express();
