@@ -12,13 +12,17 @@ const pool = new Pool({
   },
 });
 
-const alterTableQuery = `
-  ALTER TABLE image ADD COLUMN user_id INTEGER;
+const createTableSavedImages = `
+  CREATE TABLE IF NOT EXISTS user_saved_images (
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  image_id INTEGER REFERENCES image(id) ON DELETE CASCADE,
+  PRIMARY KEY (user_id, image_id)
+);
 `;
 
 async function runMigration() {
   try {
-    await pool.query(alterTableQuery);
+    await pool.query(createTableSavedImages);
     console.log('Migration ran successfully');
   } catch (err) {
     console.error('Error running migration:', err);
