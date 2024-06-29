@@ -1,6 +1,7 @@
+require('dotenv').config();
+
 const redis = require('redis');
 
-require('dotenv').config();
 
 const redisClient = redis.createClient({
   password: process.env.REDDIS_PASSWORD,
