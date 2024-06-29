@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
 require('dotenv').config();
@@ -10,7 +11,7 @@ const redisClient = require('./redisClient');
 const app = express();
 app.use(cors());
 app.use(express.json());
-require('dotenv').config();
+
 
 const pool = new Pool({
   user: process.env.USER,
@@ -23,8 +24,34 @@ const pool = new Pool({
   },
 });
 
+
 app.get('/', (req, res) => {
+  
   res.send("Hello from Express");
+});
+
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  console.log('JWT_SECRET:', process.env.JWT_SECRET);
+  try {
+    const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = userResult.rows[0];
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.json({ token });
+  } catch (err) {
+    console.error('Error logging in:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 app.get('/images', authMiddleware, async (req, res) => {
@@ -121,30 +148,6 @@ app.delete('/images/:id', authMiddleware, async (req, res) => {
     }
   } catch (err) {
     console.error('Error deleting the image:', err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    const user = userResult.rows[0];
-
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
-  } catch (err) {
-    console.error('Error logging in:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
