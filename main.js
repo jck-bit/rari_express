@@ -5,8 +5,8 @@ require('dotenv').config();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const authMiddleware = require('./authMiddlware')
-const redisClient = require('./redisClient');
+const authMiddleware = require('./middleware/authMiddlware')
+const redisClient = require('./redis/redisClient');
 
 const app = express();
 app.use(cors());
@@ -45,7 +45,7 @@ app.post('/login', async (req, res) => {
     if (!validPassword) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.json({ token });
   } catch (err) {
