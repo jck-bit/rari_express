@@ -6,13 +6,33 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const authMiddleware = require('./middleware/authMiddlware')
-const redisClient = require('./redis/redisClient');
+// const redisClient = require('./redis/redisClient');
+const redis = require('redis')
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+const redisClient = redis.createClient({
+  password: process.env.REDDIS_PASSWORD,
+  socket: {
+    host: process.env.REDDIS_HOST,
+    port: process.env.REDDIS_PORT
+  }
+});
 
+
+const connectRedis = async () => {
+  try {
+    await redisClient.connect();
+    console.log('Connected to Redis');
+  } catch (err) {
+    console.error('Could not establish a connection with Redis. ' + err);
+    process.exit(1);
+  }
+};
+
+connectRedis();
 
 const pool = new Pool({
   user: process.env.USER,
@@ -35,10 +55,12 @@ app.get('/images', authMiddleware, async (req, res) => {
     if (cachedImages) {
       return res.json(JSON.parse(cachedImages));
     }
-    const result = await pool.query('SELECT id, name, image_url, date_created FROM image ORDER BY date_created DESC LIMIT 100');
+
+    const result = await pool.query('SELECT id, name, image_url, date_created FROM image ORDER BY date_created DESC LIMIT 1000');
     await redisClient.set('images', JSON.stringify(result.rows), {
       EX: 60 * 60, 
     });
+
     res.json(result.rows);
   } catch (err) {
     console.error('Error querying the database:', err);
@@ -129,7 +151,7 @@ try {
     return res.status(400).json({ error: 'Invalid email or password' });
   }
   const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
-    expiresIn: '3m',
+    expiresIn: '7d',
   });
   res.json({ token });
 } catch (err) {
