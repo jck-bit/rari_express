@@ -18,5 +18,3 @@ const testSingleImage = async()=>{
         console.error('Error fetching image:', error);
     }
 }
-
-//testSingleImage()
